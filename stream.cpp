@@ -88,8 +88,7 @@ String Stream::readString()
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (huart->Instance == USART1) {
-		auto &udata = USART1_DATA;
+	auto _incoming_byte_handler = [](ring_t& udata, UART_HandleTypeDef *huart) {
 		++udata.write_counter;
 
 		if (udata.write_counter == udata.read_counter)
@@ -104,6 +103,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		}
 
 		HAL_UART_Receive_IT(huart, &udata.buf[udata.write_counter], 1);
+	};
+
+	if (huart->Instance == USART1) {
+		_incoming_byte_handler(USART1_DATA, huart);
 	}
 }
 
