@@ -10,8 +10,8 @@ Stream::Stream(UART_HandleTypeDef *huart):
 {
 	if (this->_huart->Instance == USART1) {
 		this->_ring = &USART1_DATA;
-		HAL_UART_Receive_IT(huart, &USART1_DATA.buf[0], 1);
 	}
+	HAL_UART_Receive_IT(huart, this->_ring->buf, 1);
 }
 
 void Stream::write(const char *data)
