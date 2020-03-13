@@ -3,13 +3,22 @@
 #include <cstdlib>
 
 using serial_ns::ring_t;
-static ring_t USART1_DATA{};
+static ring_t *USART1_DATA = nullptr;
+static ring_t *USART2_DATA = nullptr;
+static ring_t *USART3_DATA = nullptr;
 
 Stream::Stream(UART_HandleTypeDef *huart):
 	_huart(huart), _ring(nullptr)
 {
 	if (this->_huart->Instance == USART1) {
-		this->_ring = &USART1_DATA;
+		USART1_DATA = new ring_t();
+		this->_ring = USART1_DATA;
+	} else if (this->_huart->Instance == USART2) {
+		USART2_DATA = new ring_t();
+		this->_ring = USART2_DATA;
+	} else if (this->_huart->Instance == USART3) {
+		USART3_DATA = new ring_t();
+		this->_ring = USART3_DATA;
 	}
 	HAL_UART_Receive_IT(huart, this->_ring->buf, 1);
 }
@@ -95,7 +104,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			++udata.read_counter;
 
 		if (udata.read_counter >= ring_t::USART_BUF_SIZE) {
-					udata.read_counter = 0;
+			udata.read_counter = 0;
 		}
 
 		if (udata.write_counter >= ring_t::USART_BUF_SIZE) {
@@ -106,8 +115,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	};
 
 	if (huart->Instance == USART1) {
-		_incoming_byte_handler(USART1_DATA, huart);
+		_incoming_byte_handler(*USART1_DATA, huart);
+	} else if (huart->Instance == USART2) {
+		_incoming_byte_handler(*USART2_DATA, huart);
+	} else if (huart->Instance == USART3) {
+		_incoming_byte_handler(*USART3_DATA, huart);
 	}
+
 }
 
 int ring_t::read()
