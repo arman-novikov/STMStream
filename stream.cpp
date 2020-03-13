@@ -95,35 +95,6 @@ String Stream::readString()
 	return res;
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	auto _incoming_byte_handler = [](ring_t& udata, UART_HandleTypeDef *huart) {
-		++udata.write_counter;
-
-		if (udata.write_counter == udata.read_counter)
-			++udata.read_counter;
-
-		if (udata.read_counter >= ring_t::USART_BUF_SIZE) {
-			udata.read_counter = 0;
-		}
-
-		if (udata.write_counter >= ring_t::USART_BUF_SIZE) {
-			udata.write_counter = 0;
-		}
-
-		HAL_UART_Receive_IT(huart, &udata.buf[udata.write_counter], 1);
-	};
-
-	if (huart->Instance == USART1) {
-		_incoming_byte_handler(*USART1_DATA, huart);
-	} else if (huart->Instance == USART2) {
-		_incoming_byte_handler(*USART2_DATA, huart);
-	} else if (huart->Instance == USART3) {
-		_incoming_byte_handler(*USART3_DATA, huart);
-	}
-
-}
-
 int ring_t::read()
 {
 	int res = 0;
@@ -136,4 +107,33 @@ int ring_t::read()
 	}
 
 	return res;
+}
+
+void ring_t::incoming_byte_handler(UART_HandleTypeDef *huart)
+{
+	++this->write_counter;
+
+	if (this->write_counter == this->read_counter)
+		++this->read_counter;
+
+	if (this->read_counter >= ring_t::USART_BUF_SIZE) {
+		this->read_counter = 0;
+	}
+
+	if (this->write_counter >= ring_t::USART_BUF_SIZE) {
+		this->write_counter = 0;
+	}
+
+	HAL_UART_Receive_IT(huart, &(this->buf[this->write_counter]), 1);
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if (huart->Instance == USART1) {
+		USART1_DATA->incoming_byte_handler(huart);
+	} else if (huart->Instance == USART2) {
+		USART2_DATA->incoming_byte_handler(huart);
+	} else if (huart->Instance == USART3) {
+		USART3_DATA->incoming_byte_handler(huart);
+	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <usart.h>
-#include "../string/stmstring.h"
+#include "../stmstring/stmstring.h"
 
 namespace etl {
 	constexpr const char* endl = "\n\r";
@@ -12,6 +12,10 @@ namespace serial_ns {
 		uint8_t buf[ring_t::USART_BUF_SIZE];
 		size_t write_counter;
 		size_t read_counter;
+		inline bool available() const {
+			return this->write_counter != this->read_counter;
+		}
+		void incoming_byte_handler(UART_HandleTypeDef *huart);
 		int read();
 	};
 };
@@ -27,6 +31,9 @@ public:
 	int read();
 	int readln(char* buf);
 	String readString();
+	inline bool available() const {
+		return this->_ring->available();
+	}
 	template<typename T>
 	Stream& operator<<(const T& val) {
 		this->write(val);
