@@ -79,8 +79,11 @@ int Stream::readln(char* buf)
 
 String Stream::readString()
 {
-	String res;
+	String res{};
 	char buf[2]{0};
+	if (!this->available()) // nothing to read
+		return res;
+
 	while (true) {
 		const int readbyte = this->read();
 		if (readbyte == '\n')
