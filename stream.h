@@ -3,7 +3,7 @@
 #include "../stmstring/stmstring.h"
 
 namespace etl {
-	constexpr const char* endl = "\n\r";
+	constexpr const char* endl = "\r\n";
 }
 
 namespace serial_ns {
@@ -34,11 +34,17 @@ public:
 	inline bool available() const {
 		return this->_ring->available();
 	}
+
 	template<typename T>
 	Stream& operator<<(const T& val) {
 		this->write(val);
 		return *this;
 	}
+
+	inline UART_HandleTypeDef * const get_huart() {
+		return this->_huart;
+	}
+
 	~Stream() = default;
 protected:
 	UART_HandleTypeDef *_huart;
