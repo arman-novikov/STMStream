@@ -23,6 +23,19 @@ Stream::Stream(UART_HandleTypeDef *huart):
 	HAL_UART_Receive_IT(huart, this->_ring->buf, 1);
 }
 
+void Stream::write_IT(const char *data, size_t len)
+{
+	char* data_casted = const_cast<char*>(data);
+	uint8_t *data_p = reinterpret_cast<uint8_t*>(data_casted);
+	HAL_UART_Transmit_IT(this->_huart, data_p, len);
+	HAL_Delay(len);
+}
+
+void Stream::write_IT(const char *data)
+{
+	this->write_IT(data, strlen(data));
+}
+
 void Stream::write(const char *data)
 {
 	char* data_casted = const_cast<char*>(data);

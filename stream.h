@@ -23,6 +23,8 @@ namespace serial_ns {
 class Stream {
 public:
 	Stream(UART_HandleTypeDef *huart);
+	void write_IT(const char *data, size_t len);
+	void write_IT(const char *data);
 	void write(const char *data);
 	void write(const char data);
 	void writeln(const char *data);
