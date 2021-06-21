@@ -16,7 +16,7 @@ Stream::Stream(UART_HandleTypeDef *huart):
 	} else if (this->_huart->Instance == USART2) {
 		USART2_DATA = new ring_t();
 		this->_ring = USART2_DATA;
-	} else if (this->_huart->Instance == USART3) {
+	} else if (this->_huart->Instance == USART6) {
 		USART3_DATA = new ring_t();
 		this->_ring = USART3_DATA;
 	}
@@ -149,7 +149,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		USART1_DATA->incoming_byte_handler(huart);
 	} else if (huart->Instance == USART2) {
 		USART2_DATA->incoming_byte_handler(huart);
-	} else if (huart->Instance == USART3) {
+	} else if (huart->Instance == USART6) {
 		USART3_DATA->incoming_byte_handler(huart);
 	}
 }
