@@ -5,7 +5,7 @@
 using serial_ns::ring_t;
 static ring_t *USART1_DATA = nullptr;
 static ring_t *USART2_DATA = nullptr;
-static ring_t *USART3_DATA = nullptr;
+static ring_t *USART6_DATA = nullptr;
 
 Stream::Stream(UART_HandleTypeDef *huart):
 	_huart(huart), _ring(nullptr)
@@ -17,8 +17,8 @@ Stream::Stream(UART_HandleTypeDef *huart):
 		USART2_DATA = new ring_t();
 		this->_ring = USART2_DATA;
 	} else if (this->_huart->Instance == USART6) {
-		USART3_DATA = new ring_t();
-		this->_ring = USART3_DATA;
+		USART6_DATA = new ring_t();
+		this->_ring = USART6_DATA;
 	}
 	HAL_UART_Receive_IT(huart, this->_ring->buf, 1);
 }
@@ -150,6 +150,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	} else if (huart->Instance == USART2) {
 		USART2_DATA->incoming_byte_handler(huart);
 	} else if (huart->Instance == USART6) {
-		USART3_DATA->incoming_byte_handler(huart);
+		USART6_DATA->incoming_byte_handler(huart);
 	}
 }
