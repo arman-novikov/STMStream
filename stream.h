@@ -9,11 +9,12 @@ namespace etl {
 namespace serial_ns {
 	struct ring_t {
 		static constexpr size_t USART_BUF_SIZE = 64U;
-		uint8_t buf[ring_t::USART_BUF_SIZE];
-		size_t write_counter;
-		size_t read_counter;
-		inline bool available() const {
-			return this->write_counter != this->read_counter;
+		uint8_t buffer[ring_t::USART_BUF_SIZE]{};
+		size_t write_counter = 0;
+		size_t read_counter = 0;
+		size_t data_size = 0;
+		inline size_t available() const {
+			return data_size;
 		}
 		void incoming_byte_handler(UART_HandleTypeDef *huart);
 		int read();

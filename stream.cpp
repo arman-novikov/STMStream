@@ -113,32 +113,34 @@ String Stream::readString()
 
 int ring_t::read()
 {
-	int res = 0;
-	if (this->read_counter == this->write_counter)
-		return -86; // ENODATA
-
-	res = static_cast<int>(this->buf[this->read_counter++]);
-	if (this->read_counter >= ring_t::USART_BUF_SIZE) {
-		this->read_counter = 0;
+	if (data_size == 0)
+    {
+        return -86; // ENODATA
+    }
+    auto popped_value = buffer[read_counter];
+	if (++read_counter >= USART_BUF_SIZE)
+	{
+		read_counter = 0;
 	}
-
-	return res;
+    --data_size;
+    return popped_value;
 }
 
 void ring_t::incoming_byte_handler(UART_HandleTypeDef *huart)
 {
-	++this->write_counter;
-
-	if (this->write_counter == this->read_counter)
-		++this->read_counter;
-
-	if (this->read_counter >= ring_t::USART_BUF_SIZE) {
-		this->read_counter = 0;
+	buffer[write_counter++] = v;
+	if (write_counter >= USART_BUF_SIZE)
+	{
+		write_counter = 0;
 	}
-
-	if (this->write_counter >= ring_t::USART_BUF_SIZE) {
-		this->write_counter = 0;
-	}
+    if (++data_size > USART_BUF_SIZE)
+    {
+		if (++read_counter >= USART_BUF_SIZE)
+		{
+			read_counter = 0;
+		}
+    }
+    data_size = std::min(data_size, USART_BUF_SIZE);
 
 	HAL_UART_Receive_IT(huart, &(this->buf[this->write_counter]), 1);
 }
